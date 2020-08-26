@@ -8,6 +8,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * @create 2020-08-26
  *
  */
+
 object MakeRDDTest {
   def main(args: Array[String]): Unit = {
 
