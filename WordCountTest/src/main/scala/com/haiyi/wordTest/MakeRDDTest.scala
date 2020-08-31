@@ -17,13 +17,18 @@ object MakeRDDTest {
 
     val list: List[Int] = List(1, 2, 3, 4, 5)
 
-//    val inputRDD: RDD[Int] = sc.parallelize(list)
-    val inputRDD: RDD[Int] = sc.makeRDD(list,2)
+    val inputRDD: RDD[Int] = sc.parallelize(list)
+//    val inputRDD: RDD[Int] = sc.makeRDD(list,2)
 //    val inputRDD: RDD[String] = sc.textFile("input",3)
 
-    inputRDD.mapPartitions(datas=>{
-      datas.map(_ * 2)
-    }).collect().foreach(println)
+//    inputRDD.mapPartitions(datas=>{
+//      datas.map(_ * 2)
+//    }).collect().foreach(println)
+
+//    inputRDD.mapPartitionsWithIndex(
+//      (index, datas)=>{
+//        datas.map( data =>(index, data) )
+//    }).collect().foreach(println)
 
 
     sc.stop()
