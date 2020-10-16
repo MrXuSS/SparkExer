@@ -13,11 +13,15 @@ object RDD_Exer {
     val conf: SparkConf = new SparkConf().setMaster("local[*]").setAppName("WordCount")
     val sc: SparkContext = new SparkContext(conf)
 
-    val list: List[Int] = List(3,4,1,2,5)
+    val list: List[Int] = List(1,2,3,4,5)
 
     val inputRDD: RDD[Int] = sc.parallelize(list, 3)
 
     inputRDD.map((_,1))
+
+    inputRDD.foreach(println)
+    println("=============================")
+    inputRDD.collect().foreach(println)
 
     sc.stop()
 
