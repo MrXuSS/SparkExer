@@ -1,5 +1,6 @@
 package com.haiyi.exer
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -87,10 +88,14 @@ object Top10Category_v2_top10Session {
 
 
     val categotyIds: Array[String] = finalResult.map(_.categoryId)
-
+    val broadcastIds: Broadcast[Array[String]] = sc.broadcast(categotyIds)
     val filterRDD: RDD[UserVisitAction] = userVisitAction.filter(
       action => {
-        isInArray(action.click_category_id.toString, categotyIds)
+        if(action.click_category_id != -1) {
+          broadcastIds.value.contains(action.click_category_id.toString)
+        }else{
+          false
+        }
       }
     )
 
@@ -115,18 +120,6 @@ object Top10Category_v2_top10Session {
 
     sc.stop()
   }
-
-  def isInArray(id:String, categotyIds:Array[String]) :Boolean={
-    var result:Boolean = false
-    for (elem <- categotyIds) {
-      if(elem == id){
-        result = true
-      }
-    }
-    result
-  }
-
-
 
   /**
    * 用户访问动作表

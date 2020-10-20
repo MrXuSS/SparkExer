@@ -1,5 +1,6 @@
 package com.haiyi.exer
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.util.AccumulatorV2
 import org.apache.spark.{SparkConf, SparkContext}
@@ -91,10 +92,15 @@ object Top10Category_v3_top10Session {
     ).take(10).foreach(println)
 
     val list: List[String] = finalInfoes.map(_.categoryId).toList
+    val broadcastIds: Broadcast[List[String]] = sc.broadcast(list)
 
     val filterRDD: RDD[UserVisitAction] = userVisitAction.filter(
       action => {
-        isInList(action.click_category_id.toString, list)
+        if(action.click_category_id != -1) {
+          broadcastIds.value.contains(action.click_category_id.toString)
+        }else{
+          false
+        }
       }
     )
     val acc1 = new CategoryAndSessionAcc
@@ -120,15 +126,6 @@ object Top10Category_v3_top10Session {
     sc.stop()
   }
 
-  def isInList(id:String, categotyIds:scala.List[String]) :Boolean={
-    var result:Boolean = false
-    for (elem <- categotyIds) {
-      if(elem == id){
-        result = true
-      }
-    }
-    result
-  }
   // (category_id-session_id, sum)
   class CategoryAndSessionAcc extends AccumulatorV2[UserVisitAction, mutable.Map[(String, String), Long]] {
 
