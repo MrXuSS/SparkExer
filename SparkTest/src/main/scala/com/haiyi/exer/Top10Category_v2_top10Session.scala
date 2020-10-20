@@ -92,6 +92,7 @@ object Top10Category_v2_top10Session {
     val filterRDD: RDD[UserVisitAction] = userVisitAction.filter(
       action => {
         if(action.click_category_id != -1) {
+          // 注意参数的类型， 要与前面加入到broadcast中的数据的类型一致。
           broadcastIds.value.contains(action.click_category_id.toString)
         }else{
           false
