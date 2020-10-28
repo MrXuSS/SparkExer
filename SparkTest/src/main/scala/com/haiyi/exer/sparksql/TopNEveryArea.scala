@@ -1,11 +1,10 @@
-package com.haiyi.exer
+package com.haiyi.exer.sparksql
 
 import java.text.DecimalFormat
 
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types.{DataType, LongType, MapType, StringType, StructField, StructType}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
  * @author Mr.Xu

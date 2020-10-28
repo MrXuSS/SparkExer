@@ -1,14 +1,13 @@
-package com.haiyi.exer
+package com.haiyi.exer.sparkcore
 
-import org.apache.spark.rdd.RDD
 import org.apache.spark.util.AccumulatorV2
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.{immutable, mutable}
-import scala.collection.mutable.ListBuffer
 
 /**
  * 采用累加器的方式， 消除shuffle造成的执行时间长
+ *
  * @author Mr.Xu
  * @create 2020-10-16 14:58
  *         热门品类top10

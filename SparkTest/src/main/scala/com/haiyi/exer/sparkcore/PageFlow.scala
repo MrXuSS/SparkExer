@@ -1,7 +1,6 @@
-package com.haiyi.exer
+package com.haiyi.exer.sparkcore
 
-import com.haiyi.exer.Top10Category_v2_top10Session.UserVisitAction
-import com.sun.xml.internal.bind.v2.TODO
+import com.haiyi.exer.sparkcore.Top10Category.UserVisitAction
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 

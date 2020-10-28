@@ -1,4 +1,4 @@
-package com.haiyi.exer
+package com.haiyi.exer.sparkcore
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -6,6 +6,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 import scala.collection.mutable.ListBuffer
 
 /**
+ * 优化， 采用reduceByKey代替groupByKey
+ *
  * @author Mr.Xu
  * @create 2020-10-16 14:58
  *         热门品类top10
@@ -13,7 +15,7 @@ import scala.collection.mutable.ListBuffer
  *         2019-07-17_95_26070e87-1ad7-49a3-8fb3-cc741facaddf_48_2019-07-17 00:00:10_null_16_98_null_null_null_null_19
  *         2019-07-17_95_26070e87-1ad7-49a3-8fb3-cc741facaddf_6_2019-07-17 00:00:17_null_19_85_null_null_null_null_7
  */
-object Top10Category {
+object Top10Category_v2 {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setMaster("local[*]").setAppName("Top10Category")
     val sc = new SparkContext(conf)
@@ -44,22 +46,22 @@ object Top10Category {
     )
 
     // UserVisitAction => CategoryCountInfo(id, 1, 0, 0), CategoryCountInfo(id, 0, 1, 0)
-    val infoRDD: RDD[CategoryCountInfo] = userVisitAction.flatMap(
+    val flatMapRDD: RDD[(String, CategoryCountInfo)] = userVisitAction.flatMap(
       action => {
         if (action.click_category_id != -1) {
-          List(CategoryCountInfo(action.click_category_id.toString, 1, 0, 0))
+          List((action.click_category_id.toString, CategoryCountInfo(action.click_category_id.toString, 1, 0, 0)))
         } else if (action.order_category_ids != "null") {
-          val listBuffer = new ListBuffer[CategoryCountInfo]
+          val listBuffer = new ListBuffer[(String, CategoryCountInfo)]
           val ids = action.order_category_ids.split(",")
           for (id <- ids) {
-            listBuffer.append(CategoryCountInfo(id, 0, 1, 0))
+            listBuffer.append((id, CategoryCountInfo(id, 0, 1, 0)))
           }
           listBuffer
         } else if (action.pay_category_ids != "null") {
-          val listBuffer = new ListBuffer[CategoryCountInfo]
+          val listBuffer = new ListBuffer[(String, CategoryCountInfo)]
           val ids = action.pay_category_ids.split(",")
           for (id <- ids) {
-            listBuffer.append(CategoryCountInfo(id, 0, 0, 1))
+            listBuffer.append((id, CategoryCountInfo(id, 0, 0, 1)))
           }
           listBuffer
         } else {
@@ -67,23 +69,17 @@ object Top10Category {
         }
       }
     )
-    // 分组聚合
-    val groupRDD: RDD[(String, Iterable[CategoryCountInfo])] = infoRDD.groupBy(_.categoryId)
-    val resultRDD: RDD[(String, CategoryCountInfo)] = groupRDD.mapValues(
-      datas => {
-        datas.reduce(
-          (data1, data2) => {
-            data1.clickCount = data1.clickCount + data2.clickCount
-            data1.orderCount = data1.orderCount + data2.orderCount
-            data1.payCount = data1.payCount + data2.payCount
-            data1
-          }
-        )
+    val reduByKeyRDD: RDD[(String, CategoryCountInfo)] = flatMapRDD.reduceByKey(
+      (info1, info2) => {
+        info1.clickCount = info1.clickCount + info2.clickCount
+        info1.orderCount = info1.orderCount + info2.orderCount
+        info1.payCount = info1.payCount + info2.payCount
+        info1
       }
     )
 
     // 排序
-    val finalResult: Array[CategoryCountInfo] = resultRDD
+    val finalResult: Array[CategoryCountInfo] = reduByKeyRDD
       .map(_._2)
       .sortBy(data => (data.clickCount, data.orderCount, data.payCount), false)
       .take(10)

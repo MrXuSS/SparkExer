@@ -1,4 +1,4 @@
-package com.haiyi.exer
+package com.haiyi.exer.sparkcore
 
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -8,6 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 /**
  * Top10品类的Top10Session
+ *
  * @author Mr.Xu
  * @create 2020-10-16 14:58
  *         热门品类top10
