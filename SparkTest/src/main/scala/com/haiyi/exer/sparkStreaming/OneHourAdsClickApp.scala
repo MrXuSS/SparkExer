@@ -13,7 +13,7 @@ import org.apache.spark.streaming.{Minutes, Seconds, StreamingContext}
 /**
  * @author Mr.Xu
  * @create 2020-11-05 14:41
- *  每十秒统计过去一分钟的每个广告点击量
+ *  每十秒统计过去一分钟每十秒点的每个广告点击量        11 12 14 15 16 ... 都属于 10s 点
  */
 object OneHourAdsClickApp {
   def main(args: Array[String]): Unit = {
