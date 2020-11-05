@@ -34,7 +34,7 @@ object OneHourAdsClickApp {
     val dStream: InputDStream[(String, String)] = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
       ssc, kafkaParams, Set(topic))
 
-    val adsId: DStream[((String, String), Int)] = dStream.map {
+    val adsId = dStream.map {
       case (t1, t2) => {
         val words: Array[String] = t2.split(",")
         val sdf = new SimpleDateFormat("mm:ss")
@@ -43,10 +43,13 @@ object OneHourAdsClickApp {
       }
     }
 
-    val windowDS: DStream[((String, String), Int)] = adsId.window(Minutes(1), Seconds(10))
-    val resultDS: DStream[((String, String), Int)] = windowDS.reduceByKey(_ + _)
+    val windowDS = adsId.window(Minutes(1), Seconds(10))
+    val idAndTsAndCount: DStream[((String, String), Int)] = windowDS.reduceByKey(_ + _)
+    val idToTsAndCount: DStream[(String, (String, Int))] = idAndTsAndCount.map {
+      case ((id, ts), count) => (id, (ts, count))
+    }
+    val resultDS: DStream[(String, Iterable[(String, Int)])] = idToTsAndCount.groupByKey()
     resultDS.print()
-
 
     ssc.start()
     ssc.awaitTermination()
